@@ -60,10 +60,10 @@ async def create_task(payload: TaskCreate, background_tasks: BackgroundTasks):
         "completed_at": None,
     }
 
-    # Persist initial state to Redis
+    # Persist initial state to Redis (primary storage)
     await redis_set(f"task:{task_id}", task_data, expire=86400 * 7)
 
-    # Try to persist to DB
+    # Try to persist to DB (non-fatal)
     try:
         from app.core.database import AsyncSessionLocal
         from app.models.task import Task, TaskStatus
@@ -79,7 +79,8 @@ async def create_task(payload: TaskCreate, background_tasks: BackgroundTasks):
             session.add(db_task)
             await session.commit()
     except Exception as e:
-        logger.warning("db_create_failed", task_id=task_id, error=str(e))
+        logger.warning("db_create_failed_non_fatal", task_id=task_id, error=str(e)[:100])
+        # DB failure is non-fatal - Redis is primary storage
 
     logger.info("task_created", task_id=task_id, title=payload.title)
 

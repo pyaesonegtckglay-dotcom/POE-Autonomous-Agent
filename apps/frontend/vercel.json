@@ -4,6 +4,6 @@
   "outputDirectory": ".next",
   "installCommand": "npm install",
   "env": {
-    "NEXT_PUBLIC_BACKEND_URL": "https://pyaesonegtckglay-poe-autonomous-agent-backend.hf.space"
+    "NEXT_PUBLIC_BACKEND_URL": "https://PYAE1994-poe-autonomous-agent-backend.hf.space"
   }
 }

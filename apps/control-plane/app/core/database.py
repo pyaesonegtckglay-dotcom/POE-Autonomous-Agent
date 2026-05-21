@@ -1,6 +1,5 @@
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
 from sqlalchemy.orm import DeclarativeBase
-from sqlalchemy import create_engine
 from app.core.config import settings
 import structlog
 
@@ -11,22 +10,29 @@ class Base(DeclarativeBase):
     pass
 
 
-# Async engine for FastAPI
 def get_async_db_url(url: str) -> str:
     """Convert sync postgres URL to async."""
-    if url.startswith("postgresql://"):
+    if url.startswith("postgresql://") and "+asyncpg" not in url:
         url = url.replace("postgresql://", "postgresql+asyncpg://", 1)
     if url.startswith("postgres://"):
         url = url.replace("postgres://", "postgresql+asyncpg://", 1)
     return url
 
 
+_db_url = get_async_db_url(settings.DATABASE_URL)
+
+# Use statement_cache_size=0 for pgbouncer compatibility (Supabase uses pgbouncer)
+_connect_args = {}
+if "asyncpg" in _db_url:
+    _connect_args = {"statement_cache_size": 0}
+
 async_engine = create_async_engine(
-    get_async_db_url(settings.DATABASE_URL),
+    _db_url,
     echo=settings.DEBUG,
     pool_pre_ping=True,
-    pool_size=5,
-    max_overflow=10,
+    pool_size=3,
+    max_overflow=5,
+    connect_args=_connect_args,
 )
 
 AsyncSessionLocal = async_sessionmaker(
@@ -50,6 +56,9 @@ async def get_db() -> AsyncSession:
 
 async def create_tables():
     """Create all database tables."""
-    async with async_engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
-    logger.info("database_tables_created")
+    try:
+        async with async_engine.begin() as conn:
+            await conn.run_sync(Base.metadata.create_all)
+        logger.info("database_tables_created")
+    except Exception as e:
+        logger.warning("database_create_tables_failed", error=str(e))

@@ -202,12 +202,12 @@ export default function DeployPage() {
           <div>
             <p className="text-xs text-slate-500 mb-1">Backend (HuggingFace)</p>
             <a
-              href="https://pyaesonegtckglay-poe-autonomous-agent-backend.hf.space"
+              href="https://PYAE1994-poe-autonomous-agent-backend.hf.space"
               target="_blank"
               rel="noopener noreferrer"
               className="text-sm text-poe-cyan hover:underline break-all"
             >
-              https://pyaesonegtckglay-poe-autonomous-agent-backend.hf.space
+              https://PYAE1994-poe-autonomous-agent-backend.hf.space
             </a>
           </div>
           <div>
