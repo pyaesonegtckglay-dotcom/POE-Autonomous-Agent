@@ -1,0 +1,16 @@
+node_modules/
+.next/
+__pycache__/
+*.pyc
+*.pyo
+.env
+.env.local
+.DS_Store
+*.egg-info/
+dist/
+build/
+.venv/
+venv/
+*.log
+.pytest_cache/
+.mypy_cache/
